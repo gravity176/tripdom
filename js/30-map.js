@@ -42,11 +42,17 @@ function pinSVG(color, selected){
     </svg>`;
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
 }
+/* 打点范围：默认只打「重点目的地」；
+   已打开 / 限定某个旅游区域（state.regionId 有值）时，打该区域的全部关联目的地。
+   与「目的地」/「旅游区域」标签页无关 —— 区域标签页本身仍只打重点目的地。 */
+function markerPlaces(){
+  const list = filteredPlaces().filter(p => p.coord);
+  return state.regionId ? list : list.filter(p => p.key);
+}
 function renderMarkers(){
   if (!markerLayer || !PLACES.length) return;
   const styles = {}, geos = [];
-  filteredPlaces().forEach(p=>{
-    if (!p.coord || !p.key) return;          // 地图只打点「重点目的地」
+  markerPlaces().forEach(p=>{
     const color = themeColor((p.themes||[])[0]);
     const sel = state.current && state.current.type==='place' && state.current.id===p.id;
     const scale = sel ? 1.22 : 1;

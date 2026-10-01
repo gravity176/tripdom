@@ -95,6 +95,9 @@ function linkRegions(){
         : hit;
       return { name, attraction: a || null };
     });
+    /* 排序：结构化（attractions.json 里按 name 对得上、可点击跳转）排前，非结构化排后；
+       同组内保持 data 里的原顺序 —— 依赖 ES2019+ 的稳定排序 */
+    r.spots.sort((a, b) => (a.attraction ? 0 : 1) - (b.attraction ? 0 : 1));
   });
 }
 

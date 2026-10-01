@@ -193,7 +193,7 @@ function openRegion(id, zoom){
 
   $('#dwBody').innerHTML = `
     <div class="dw-sec">
-      <h5>什么时候去</h5>
+      <h5>推荐季节</h5>
       <div class="cal-wrap">
         ${calHTML(r._season)}
         <div class="cal-note">${esc(seasonDisplay(r) || '季节信息待补充')}</div>

@@ -145,6 +145,18 @@ const sleep = ms => new Promise(r=>setTimeout(r,ms));
   console.log('  抽 3 个区域：', sStat.sample.join(' | '));
   ok(sStat.linked > 0 && sStat.linked < sStat.total, '部分代表景点已结构化（可点击），其余保持未结构化');
 
+  /* 排序：结构化优先、非结构化靠后；同组内保持 data 原顺序（稳定排序） */
+  const ord = JSON.parse(run(`JSON.stringify({
+    bad:    REGIONS.filter(r => r.spots.some((s,i) => i > 0 && !r.spots[i-1].attraction && s.attraction)).map(r=>r.id),
+    stable: REGIONS.filter(r => JSON.stringify(r.spots.filter(s=>s.attraction).map(s=>s.name))
+                          !== JSON.stringify((r.attractionSpots||[]).filter(n => {
+                               const s = r.spots.find(x=>x.name===n); return s && s.attraction; }))).map(r=>r.id),
+    mix:    REGIONS.filter(r => { const l = r.spots.filter(s=>s.attraction).length; return l > 0 && l < r.spots.length; }).length
+  })`));
+  console.log('  排序：混排区域 ' + ord.mix + ' 个；存在「非结构化在前」的区域 ' + ord.bad.length + ' 个');
+  eq(ord.bad.length, 0, '关联景点排序：结构化全部排在非结构化之前' + (ord.bad.length?' 异常:'+ord.bad:''));
+  eq(ord.stable.length, 0, '排序稳定：结构化组内仍是 data 里的原顺序' + (ord.stable.length?' 异常:'+ord.stable:''));
+
   console.log('\n=== 5. 双轨季节解析（真实数据） ===');
   const seStat = JSON.parse(run(`JSON.stringify({
     total: PLACES.length + REGIONS.length + ATTRACTIONS.length,
@@ -278,6 +290,26 @@ const sleep = ms => new Promise(r=>setTimeout(r,ms));
   ok(!/class="rec"/.test(rBody), '旧的 .rec 卡片行已不再输出');
   ok(!/undefined|\[object/.test(rBody), '区域抽屉无 undefined');
 
+  /* 关联景点排序落到抽屉 HTML：可点（.pill.link）的一律排在未结构化之前 */
+  const mixedId = run(`(function(){
+    const r = REGIONS.filter(r => { const l = r.spots.filter(s=>s.attraction).length;
+                                    return l > 0 && l < r.spots.length && r.spots.length <= 18; })
+                      .sort((a,b) => b.spots.length - a.spots.length)[0];
+    return r ? r.id : null;
+  })()`);
+  if (mixedId){
+    const mixSeq = JSON.parse(run(`JSON.stringify((function(){
+      openRegion(${JSON.stringify(mixedId)}, true);
+      const h = $('#dwBody').innerHTML, i = h.indexOf('id="spotPills"');
+      const seg = h.slice(i, h.indexOf('cal-note', i));
+      const spots = regionById[${JSON.stringify(mixedId)}].spots;
+      return { seq: (seg.match(/class="pill( link)?"/g) || []).map(s => s.indexOf('link') > 0 ? 'L' : 'U').join(''),
+               linked: spots.filter(s=>s.attraction).length, total: spots.length, id: ${JSON.stringify(mixedId)} };
+    })())`));
+    console.log('  混排区域 ' + mixSeq.id + ' 首屏 pill：' + mixSeq.seq + '（L=结构化 / U=未结构化，' + mixSeq.linked + '/' + mixSeq.total + '）');
+    eq(mixSeq.seq, 'L'.repeat(mixSeq.linked) + 'U'.repeat(mixSeq.total - mixSeq.linked), '抽屉里结构化景点全部排在未结构化之前');
+  }
+
   console.log('\n=== 10. 代表景点 → 目的地 + 高亮 ===');
   const t = JSON.parse(run(`JSON.stringify((function(){
     const r = REGIONS.find(x=>x.spots.some(s=>s.attraction));
@@ -352,6 +384,8 @@ const sleep = ms => new Promise(r=>setTimeout(r,ms));
   console.log('  区域抽屉章节：  ' + sec.r.join(' / '));
   const allSec = sec.p.concat(sec.r).join('|');
   ok(!/目的地概览|区域速写|交通与动线|怎么去/.test(allSec), '旧章节名已全部替换（目的地概览/区域速写/交通与动线/怎么去）');
+  ok(sec.r.includes('推荐季节') && !sec.r.includes('什么时候去'), '旅游区域抽屉的「什么时候去」已改名为「推荐季节」');
+  ok(sec.p.includes('什么时候去'), '目的地抽屉仍用「什么时候去」（本次只改区域抽屉）');
   ok(sec.p.includes('概览') && sec.r.includes('概览'), '两个抽屉都改为「概览」');
   eq(sec.p.includes('交通'), run(`!!placeById[${JSON.stringify(gradePlace)}].transport`), '「交通」章节按数据是否存在出现');
   eq(sec.r.includes('交通'), run(`!!regionById[${JSON.stringify(topRegion)}].transport`), '区域「交通」章节同样按数据出现');
@@ -434,6 +468,32 @@ const sleep = ms => new Promise(r=>setTimeout(r,ms));
     ok(run(`$('#dwPhoto').hidden === true && !$('#dwHero').classList.contains('has-photo')`),
        '没有配图的目的地：只保留主题渐变，不出现破图');
   }
+
+  console.log('\n=== 15. 地图打点范围（默认只打重点 / 区域限定后打全部） ===');
+  const dots = JSON.parse(run(`JSON.stringify((function(){
+    const snap = o => ({ n:o.length, nonKey:o.filter(p=>!p.key).length, noCoord:o.filter(p=>!p.coord).length });
+    const keyCount = PLACES.filter(p=>p.key).length;
+    state.q = ''; state.range = null; state.themes.clear();
+    state.regionId = null; state.tab = 'places';  const placesTab  = snap(markerPlaces());
+    state.tab = 'regions';                        const regionsTab = snap(markerPlaces());
+    state.tab = 'places';  state.regionId = 'hexi-corridor';
+    const inRegion = markerPlaces();
+    const region = Object.assign(snap(inRegion), {
+      places: regionById['hexi-corridor'].places.length,
+      strangers: inRegion.filter(p => (p.regionIds||[]).indexOf('hexi-corridor') < 0).map(p=>p.id)
+    });
+    state.regionId = null; state.tab = 'places';  // 还原，避免影响后续
+    return { keyCount: keyCount, placesTab: placesTab, regionsTab: regionsTab, region: region };
+  })())`));
+  console.log('  重点目的地 ' + dots.keyCount + ' 个；无区域限定时打点 ' + dots.placesTab.n + ' 个（非重点 ' + dots.placesTab.nonKey + ' 个）');
+  console.log('  「旅游区域」标签页、未打开具体区域：打点 ' + dots.regionsTab.n + ' 个');
+  console.log('  打开「河西走廊」后：打点 ' + dots.region.n + ' 个（该区域关联目的地 ' + dots.region.places + ' 个，非重点 ' + dots.region.nonKey + ' 个）');
+  eq(dots.placesTab.n, dots.keyCount, '默认（含「旅游区域」标签页）只打重点目的地');
+  eq(dots.regionsTab.n, dots.keyCount, '纯「旅游区域」标签页不放大打点范围（保持克制）');
+  eq(dots.region.n, dots.region.places, '打开 / 限定某区域后，打该区域全部关联目的地');
+  ok(dots.region.nonKey > 0, '区域限定态确实把非重点目的地也打上了（切换生效）');
+  eq(dots.region.strangers.length, 0, '区域限定态的打点全部属于该区域' + (dots.region.strangers.length?' 越界:'+dots.region.strangers:''));
+  eq(dots.placesTab.noCoord + dots.region.noCoord, 0, '参与打点的目的地都有 coord');
 
   console.log('\n================ 结果 ================');
   console.log('通过 ' + pass.length + ' 项，失败 ' + fail.length + ' 项');
