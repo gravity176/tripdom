@@ -6,19 +6,37 @@
 /* ============================================================
    渲染：侧栏
    ============================================================ */
-/* 旬级双滑块：读取滑块值 → 更新 state.range / 填充条 / 文字标签 */
+/* ------------------------------------------------------------
+   旬级双滑块
+   值域 = 旬「边界」0…EDGE_N（0 = 1月上旬起点，36 = 12月下旬终点）。
+   12 月 × 3 旬 = 36 个等分边界 ⇒ 刻度 3(m-1)/36 = k/12 正好钉在每月起点上：
+   13 条刻度、12 等格，每格恰好一个月（3 个旬槽）。
+   对外仍写回 state.range 的旬区间 [起旬, 止旬]（含端点，0…XUN_MAX），
+   因此筛选 / 日历 / 计数等一切下游逻辑零改动。
+   ------------------------------------------------------------ */
+function axPct(b){ return b / EDGE_N * 100; }                      // 边界 → 轴百分比
+const MONTH_EDGES = Array.from({length:12}, (_, i) => 3 * i);      // 每月起点边界 0,3,…,33
+
+/* 12 等格刻度（含头尾共 13 条）；月份标签与第 1/3/5/7/9/11 条刻度共用同一 left，精确对位 */
+function renderMonthScale(){
+  const edges = MONTH_EDGES.concat(EDGE_N);                        // 0,3,…,33,36
+  $('#drTicks').innerHTML    = edges.map(b => `<i style="left:${axPct(b)}%"></i>`).join('');
+  $('#rangeScale').innerHTML = MONTH_EDGES.map((b,i) => i % 2 ? '' :
+    `<span${i ? '' : ' class="at-start"'} style="left:${axPct(b)}%">${i+1}月</span>`).join('');
+}
+
 function syncRange(){
-  let a = +$('#rsMin').value, b = +$('#rsMax').value;
-  const s = Math.min(a,b), e = Math.max(a,b);
-  $('#drFill').style.left  = (s/35*100) + '%';
-  $('#drFill').style.width = ((e-s)/35*100) + '%';
-  if (s === 0 && e === 35){
-    state.range = null;
-    $('#cRange').textContent = '不限';
-  } else {
-    state.range = [s,e];
-    $('#cRange').textContent = xunLabel(s) + ' — ' + xunLabel(e);
-  }
+  const a = +$('#rsMin').value, b = +$('#rsMax').value;
+  const sb = Math.min(a,b), eb = Math.max(a,b);                    // 边界 0…EDGE_N
+  const s = Math.min(sb, XUN_MAX);                                 // 起始旬
+  const e = Math.max(s, Math.min(eb - 1, XUN_MAX));                // 结束旬（含端点）
+  $('#drFill').style.left  = axPct(sb) + '%';
+  $('#drFill').style.width = axPct(eb - sb) + '%';
+  const everywhere = (sb === 0 && eb === EDGE_N);                  // 0…36 = 全年 = 不限
+  state.range = everywhere ? null : [s,e];
+  $('#cRange').textContent = everywhere ? '不限' : xunLabel(s) + ' — ' + xunLabel(e);
+  $('#rsMin').setAttribute('aria-valuetext', xunLabel(s) + '起');   // 值域是边界，读屏仍报旬
+  $('#rsMax').setAttribute('aria-valuetext', xunLabel(e) + '止');
 }
 function renderThemeChips(){
   const tc = $('#themeChips'); tc.innerHTML='';
@@ -32,8 +50,8 @@ function renderThemeChips(){
 function renderTabs(){
   $('#tabPlaces').classList.toggle('on', state.tab==='places');
   $('#tabRegions').classList.toggle('on', state.tab==='regions');
-  $('#nPlaces').textContent  = PLACES.length;
-  $('#nRegions').textContent = REGIONS.length;
+  $('#nPlaces').textContent  = filteredPlaces().length;    // 随当前筛选实时变化
+  $('#nRegions').textContent = filteredRegions().length;
   const banner = $('#regionBanner');
   if (state.regionId && regionById[state.regionId] && state.tab==='places'){
     banner.style.display='flex';

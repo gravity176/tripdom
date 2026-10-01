@@ -59,15 +59,17 @@
             <span class="range-label" id="cRange">不限</span>
             <button class="range-reset" id="rangeReset">不限</button>
           </div>
+          <!-- 滑块值域 = 旬「边界」0…36（36 = 12月下旬结束）；由 20-list.syncRange() 换算成旬区间 -->
           <div class="dual-range">
-            <div class="dr-track"></div>
-            <div class="dr-fill" id="drFill"></div>
-            <input type="range" id="rsMin" min="0" max="35" step="1" value="0" aria-label="起始旬">
-            <input type="range" id="rsMax" min="0" max="35" step="1" value="35" aria-label="结束旬">
+            <div class="dr-axis">
+              <div class="dr-track"></div>
+              <div class="dr-fill" id="drFill"></div>
+              <div class="dr-ticks" id="drTicks"></div>
+            </div>
+            <input type="range" id="rsMin" min="0" max="36" step="1" value="0" aria-label="起始旬">
+            <input type="range" id="rsMax" min="0" max="36" step="1" value="36" aria-label="结束旬">
           </div>
-          <div class="range-scale">
-            <span>1月</span><span>3月</span><span>5月</span><span>7月</span><span>9月</span><span>11月</span>
-          </div>
+          <div class="range-scale" id="rangeScale"></div>
         </div>
       </div>
 

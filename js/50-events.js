@@ -10,7 +10,7 @@ $('#dwClose').onclick = closeDrawer;
 $('#q').oninput = e => { state.q = e.target.value.trim(); render(); };
 $('#rsMin').addEventListener('input', ()=>{ syncRange(); render(); });
 $('#rsMax').addEventListener('input', ()=>{ syncRange(); render(); });
-$('#rangeReset').onclick = ()=>{ $('#rsMin').value = 0; $('#rsMax').value = 35; syncRange(); render(); };
+$('#rangeReset').onclick = ()=>{ $('#rsMin').value = 0; $('#rsMax').value = EDGE_N; syncRange(); render(); };
 $('#tabPlaces').onclick  = ()=>{ state.tab='places';  render(); };
 $('#tabRegions').onclick = ()=>{ state.tab='regions'; render(); };
 $('#regionBannerClear').onclick = ()=>{ state.regionId=null; render(); };

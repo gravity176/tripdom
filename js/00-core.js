@@ -1,7 +1,7 @@
 /* ============================================================
    途迹 · core    基础工具 / 主题字典 / 双轨季节解析
    ------------------------------------------------------------
-   依赖：无（最先加载）。全局：$  el  esc  txt  toast  shade  THEMES/themeName/themeColor/setThemes  XUN/xunLabel/parseSeasonDigit/parseSeasonText/seasonOf/seasonDisplay/seasonShort/calHTML
+   依赖：无（最先加载）。全局：$  el  esc  txt  toast  shade  THEMES/themeName/themeColor/setThemes  XUN/XUN_MAX/EDGE_N/xunLabel/parseSeasonDigit/parseSeasonText/seasonOf/seasonDisplay/seasonShort/calHTML
    ============================================================ */
 /* ============================================================
    基础工具
@@ -59,7 +59,9 @@ function setThemes(list){                                       // general.json 
    ============================================================ */
 const XUN      = { '上':0, '中':1, '下':2 };
 const XUN_NAME = ['上','中','下'];
-const ALL_SEASON = [[0,35]];                    // 「全年」= 1月上旬—12月下旬
+const XUN_MAX  = 35;                            // 旬号上限：0 = 1月上旬 … 35 = 12月下旬
+const EDGE_N   = XUN_MAX + 1;                   // 旬「边界」数 36 = 12 月 × 3 旬（双滑块值域 0…36）
+const ALL_SEASON = [[0, XUN_MAX]];              // 「全年」= 1月上旬—12月下旬
 
 function xunLabel(i){
   const n = ((i % 36) + 36) % 36;
