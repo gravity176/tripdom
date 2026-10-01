@@ -193,7 +193,11 @@ input{font-family:inherit;}
 }
 
 /* ---------- 地图 ---------- */
-.map-area{flex:1 1 auto; position:relative; min-width:0; background:var(--paper-2);}
+/* z-index:0 + isolation：把整个地图区压成【一个】层叠上下文。
+   腾讯 GL SDK 往 #map 注入的 tile-pane(200)/overlay-pane(400)/shadow-pane(500)/
+   tooltip-pane(650)/popup-pane(700)/control(800)/bottom(1000) 以及运行时动态创建的
+   z-index:1000 / 1000000 满铺命中层，全部被锁死在这一层里 —— 再也压不住抽屉。 */
+.map-area{flex:1 1 auto; position:relative; min-width:0; background:var(--paper-2); z-index:0; isolation:isolate;}
 #map{position:absolute; inset:0;}
 .map-veil{position:absolute; inset:0; pointer-events:none; z-index:5;
   background:
@@ -248,10 +252,10 @@ input{font-family:inherit;}
 
 /* ---------- 详情抽屉 ---------- */
 .drawer{
-  position:absolute; top:0; right:0; bottom:0; width:432px; max-width:92vw; z-index:45;
+  position:absolute; top:0; right:0; bottom:0; width:432px; max-width:92vw; z-index:60;
   background:var(--card); border-left:1px solid var(--line); box-shadow:-12px 0 40px rgba(29,42,39,.13);
   transform:translateX(102%); transition:transform .32s cubic-bezier(.4,0,.2,1);
-  display:flex; flex-direction:column;
+  display:flex; flex-direction:column; overflow:hidden;
 }
 .drawer.open{transform:translateX(0);}
 .dw-hero{
@@ -261,7 +265,7 @@ input{font-family:inherit;}
 }
 .dw-photo{
   position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;
-  opacity:0; transition:opacity .35s ease;
+  opacity:0; transition:opacity .35s ease; pointer-events:none;   /* 装饰层：绝不抢鼠标 */
 }
 .dw-photo[hidden]{display:none;}
 .dw-hero.has-photo .dw-photo{opacity:1;}
@@ -272,9 +276,10 @@ input{font-family:inherit;}
 .dw-hero .dw-close{
   position:absolute; top:14px; right:14px; width:32px; height:32px; border-radius:50%;
   background:rgba(29,42,39,.35); color:#fff; display:grid; place-items:center; backdrop-filter:blur(6px);
-  transition:.15s; z-index:2;
+  transition:.15s; z-index:3;
 }
 .dw-hero .dw-close:hover{background:rgba(29,42,39,.6);}
+.dw-hero .dw-close svg{pointer-events:none;}         /* 点击目标恒为 button 本身 */
 /* 名称区：流式排布（不再是绝对定位），长名字 / 长副标题自动换行，不会被裁 */
 .dw-hero-inner{
   position:relative; display:flex; flex-direction:column; align-items:flex-start;
@@ -293,13 +298,14 @@ input{font-family:inherit;}
   background:rgba(29,42,39,.42); padding:4px 10px; border-radius:12px; backdrop-filter:blur(6px);
 }
 .dw-hero .dw-deco{
-  position:absolute; inset:0; opacity:.16;
+  position:absolute; inset:0; opacity:.16; pointer-events:none;
   background-image:radial-gradient(circle at 78% 28%, #fff 0 2px, transparent 2px),
                    radial-gradient(circle at 22% 72%, #fff 0 2px, transparent 2px);
   background-size:38px 38px, 26px 26px;
 }
 .dw-hero.has-photo .dw-deco{display:none;}
-.dw-body{flex:1 1 auto; min-height:0; padding:16px 20px 26px; overscroll-behavior:contain;}
+/* 正文自身可滚：flex 收缩 + min-height:0 是「内容再多也能滚到底」的关键 */
+.dw-body{flex:1 1 auto; min-height:0; padding:16px 20px 26px; overscroll-behavior:contain; overflow-y:auto;}
 .dw-sec{margin-bottom:20px;}
 .dw-sec h5{
   margin:0 0 9px; font-size:11px; color:var(--ink-3); letter-spacing:1.4px; font-weight:650;
@@ -339,10 +345,6 @@ input{font-family:inherit;}
 }
 .link-chip:hover{background:#D3E8E0;}
 
-.badge-key{
-  font-size:10.5px; font-weight:700; padding:1.5px 7px; border-radius:6px;
-  background:var(--brand-soft); color:var(--brand); border:1px solid #BFDCD3; white-space:nowrap;
-}
 .pill.link{cursor:pointer; background:var(--brand-soft); color:var(--brand); font-weight:600; border:1px solid #BFDCD3;}
 .pill.link:hover{background:#D3E8E0;}
 

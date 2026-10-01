@@ -54,9 +54,7 @@ function placeCard(p){
       ${esc(p.name.slice(0,2))}
     </div>
     <div class="card-body">
-      <div class="card-title">${esc(p.name)}
-        ${p.key ? '<span class="badge-key">重点</span>' : ''}
-      </div>
+      <div class="card-title">${esc(p.name)}</div>
       <div class="card-meta">${meta.join('')}</div>
       <div class="card-desc">${txt(p.summary)}</div>
       <div class="card-tags">${(p.themes||[]).map(t=>`<span class="mini-tag">${themeName(t)}</span>`).join('')}</div>

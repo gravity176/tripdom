@@ -129,24 +129,6 @@
         <div id="legendRows"></div>
       </div>
 
-      <!-- ---------- 详情抽屉 ---------- -->
-      <div class="drawer" id="drawer">
-        <div class="dw-hero" id="dwHero">
-          <img class="dw-photo" id="dwPhoto" alt="" referrerpolicy="no-referrer" hidden>
-          <div class="dw-scrim"></div>
-          <div class="dw-deco"></div>
-          <button class="dw-close" id="dwClose" aria-label="关闭">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
-          </button>
-          <div class="dw-hero-inner">
-            <span class="dw-kicker" id="dwKicker">目的地</span>
-            <div class="dw-name" id="dwName">—</div>
-            <div class="dw-region" id="dwRegion">—</div>
-          </div>
-        </div>
-        <div class="dw-body scroll" id="dwBody"></div>
-      </div>
-
       <!-- 数据加载失败提示 -->
       <div class="fatal" id="fatal">
         <div class="box">
@@ -158,6 +140,27 @@
         </div>
       </div>
     </section>
+
+    <!-- ---------- 详情抽屉 ---------- -->
+    <!-- 关键：抽屉是 .map-area 的【兄弟】节点（不在它内部）。地图区已 isolation:isolate，
+         腾讯 GL SDK 往 #map 里注入的层 z-index 高达 1000000 也全被锁在地图区层内，
+         不可能再压住抽屉 → 关闭键可点、滚轮滚的是抽屉本身。 -->
+    <div class="drawer" id="drawer">
+      <div class="dw-hero" id="dwHero">
+        <img class="dw-photo" id="dwPhoto" alt="" referrerpolicy="no-referrer" hidden>
+        <div class="dw-scrim"></div>
+        <div class="dw-deco"></div>
+        <button type="button" class="dw-close" id="dwClose" aria-label="关闭">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <div class="dw-hero-inner">
+          <span class="dw-kicker" id="dwKicker">目的地</span>
+          <div class="dw-name" id="dwName">—</div>
+          <div class="dw-region" id="dwRegion">—</div>
+        </div>
+      </div>
+      <div class="dw-body scroll" id="dwBody"></div>
+    </div>
   </div>
 
   <!-- ================= 页脚 ================= -->

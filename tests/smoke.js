@@ -305,7 +305,7 @@ const sleep = ms => new Promise(r=>setTimeout(r,ms));
     r && (window.__c2 = regionCard(r).innerHTML);
     return { place: window.__c1, region: window.__c2 };
   })()`);
-  ok(cardSample.place && cardSample.place.includes('card-meta') && cardSample.place.includes('badge-key'), '目的地卡片含 meta 行与「重点」徽标');
+  ok(cardSample.place && cardSample.place.includes('card-meta') && !cardSample.place.includes('badge-key'), '目的地卡片含 meta 行，且已移除「重点」徽标');
   ok(cardSample.region && cardSample.region.includes('个目的地') && cardSample.region.includes('个代表景点'), '区域卡片含目的地/景点计数');
   console.log('  敦煌卡片：' + cardSample.place.replace(/\s+/g,' '));
   console.log('  河西走廊卡片：' + cardSample.region.replace(/\s+/g,' '));
@@ -321,6 +321,26 @@ const sleep = ms => new Promise(r=>setTimeout(r,ms));
   ok(/\.cal-wrap \.cal \.m\.good/.test(css), '月历放进卡片后，「适宜月」的绿色高亮仍生效（优先级已抬高）');
   ok(/\.tip\s*\{[^}]*position:fixed/.test(css) && /\.tip\s*\{[^}]*pointer-events:none/.test(css),
      '#tip 是 fixed 且不吃鼠标（不会抢 hover/点击）');
+
+  /* ---- 「重点(key)」只留后台逻辑，页面上不再呈现 ---- */
+  ok(!/badge-key/.test(css) && !JS.some(j => /badge-key/.test(j.code)),
+     '「重点」徽标的样式与标记代码已全部删除（仅保留 p.key 后台逻辑）');
+  ok(!JS.find(j=>j.f==='20-list.js').code.includes('重点') && !JS.find(j=>j.f==='40-drawer.js').code.includes('重点'),
+     '列表卡片 / 抽屉悬浮卡 / 区域名称行都不再输出「重点」字样');
+  ok(/p\.key/.test(JS.find(j=>j.f==='30-map.js').code) && /p\.key/.test(JS.find(j=>j.f==='50-events.js').code),
+     '打点过滤与「随便看看」仍按 key 逻辑运行（后台逻辑保留）');
+
+  /* ---- 抽屉不再被地图 SDK 的高层叠加物压住（关闭键 / 滚动失效的根因） ---- */
+  ok(html.indexOf('class="drawer"') > html.indexOf('</section>'),
+     '抽屉已移出 .map-area，成为 .main 的兄弟节点');
+  ok(/\.map-area\s*\{[^}]*isolation:isolate/.test(css) && /\.map-area\s*\{[^}]*z-index:0/.test(css),
+     '.map-area 建立独立层叠上下文（SDK 内部 z-index 最高 1000000 也锁在区内）');
+  ok(/\.drawer\s*\{[^}]*z-index:60/.test(css) && /\.drawer\s*\{[^}]*overflow:hidden/.test(css),
+     '抽屉 z-index 抬到 60（高于地图区层）且不再外溢');
+  ok(/\.dw-body\s*\{[^}]*overflow-y:auto/.test(css) && /\.dw-body\s*\{[^}]*min-height:0/.test(css),
+     '抽屉正文自身可滚（flex 收缩 + min-height:0）');
+  ok(/\.dw-photo\s*\{[^}]*pointer-events:none/.test(css) && /\.dw-close svg\{pointer-events:none/.test(css),
+     'hero 装饰层不吃事件，关闭键命中目标恒为 button');
 
   const sec = JSON.parse(run(`JSON.stringify((function(){
     const pick = h => (h.match(/<h5>[^<]*<\\/h5>/g)||[]).map(s=>s.replace(/<[^>]*>/g,''));

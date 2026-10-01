@@ -57,7 +57,7 @@ window.addEventListener('resize', tipHide);
 /* ---------- 悬浮卡正文 ---------- */
 function placeTipHTML(p){
   const regions = (p.regionIds || []).map(id => regionById[id] ? regionName(regionById[id]) : '').filter(Boolean);
-  return `<b>${esc(p.name)}${p.key ? ' <span class="badge-key">重点</span>' : ''}</b>
+  return `<b>${esc(p.name)}</b>
     <div class="tip-row"><span class="tip-k">位置：</span>${esc(provText(p.province))}${regions.length ? ' · ' + esc(regions.join(' / ')) : ''}</div>
     ${(p.themes || []).length ? `<div class="tip-row"><span class="tip-k">主题：</span>${esc((p.themes || []).map(themeName).join(' / '))}</div>` : ''}
     ${p.bestSeason ? `<div class="tip-row"><span class="tip-k">最佳季节：</span>${esc(seasonDisplay(p))}</div>` : ''}
@@ -185,7 +185,7 @@ function openRegion(id, zoom){
 
   TIPS.clear(); tipHide();
   /* 关联目的地：只列名称，省份 / 主题 / 季节 / 摘要进悬浮卡 */
-  const placeItem = p => `<span class="name-item" data-go="${esc(p.id)}" tabindex="0"${tipAttr(placeTipHTML(p))}>${esc(p.name)}${p.key ? ' <span class="badge-key">重点</span>' : ''}</span>`;
+  const placeItem = p => `<span class="name-item" data-go="${esc(p.id)}" tabindex="0"${tipAttr(placeTipHTML(p))}>${esc(p.name)}</span>`;
   /* 关联景点：能在 attractions.json 里按 name 对上的可点（跳到所属目的地并高亮），其余标注未结构化 */
   const spotPill = s => s.attraction
     ? `<span class="pill link" id="spot-${esc(s.attraction.id)}" data-spot="${esc(s.attraction.id)}" tabindex="0"${tipAttr(spotTipHTML(s))}>${esc(s.name)}</span>`
