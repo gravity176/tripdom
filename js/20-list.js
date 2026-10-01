@@ -7,22 +7,27 @@
    渲染：侧栏
    ============================================================ */
 /* ------------------------------------------------------------
-   旬级双滑块
+   旬级双滑块 · 年份尺
    值域 = 旬「边界」0…EDGE_N（0 = 1月上旬起点，36 = 12月下旬终点）。
-   12 月 × 3 旬 = 36 个等分边界 ⇒ 刻度 3(m-1)/36 = k/12 正好钉在每月起点上：
-   13 条刻度、12 等格，每格恰好一个月（3 个旬槽）。
+   轨道是一条干净细线（无刻度）；下方 12 等分月份标签与滑块行程共用同一条内缩轴，
+   只在单数月份落字，因此天然逐格对齐又清爽。
    对外仍写回 state.range 的旬区间 [起旬, 止旬]（含端点，0…XUN_MAX），
    因此筛选 / 日历 / 计数等一切下游逻辑零改动。
    ------------------------------------------------------------ */
 function axPct(b){ return b / EDGE_N * 100; }                      // 边界 → 轴百分比
-const MONTH_EDGES = Array.from({length:12}, (_, i) => 3 * i);      // 每月起点边界 0,3,…,33
 
-/* 12 等格刻度（含头尾共 13 条）；月份标签与第 1/3/5/7/9/11 条刻度共用同一 left，精确对位 */
+/* 月份标签：仍是 12 等分 flex（与滑块行程共用同一条内缩轴，天然对齐），
+   但只在单数月份落字 1·3·5·7·9·11月，视觉更干净 */
 function renderMonthScale(){
-  const edges = MONTH_EDGES.concat(EDGE_N);                        // 0,3,…,33,36
-  $('#drTicks').innerHTML    = edges.map(b => `<i style="left:${axPct(b)}%"></i>`).join('');
-  $('#rangeScale').innerHTML = MONTH_EDGES.map((b,i) => i % 2 ? '' :
-    `<span${i ? '' : ' class="at-start"'} style="left:${axPct(b)}%">${i+1}月</span>`).join('');
+  $('#rangeScale').innerHTML = Array.from({length:12}, (_, i) =>
+    `<span data-m="${i+1}">${i % 2 ? '' : (i+1) + '月'}</span>`).join('');
+}
+
+/* 选区覆盖到的月份：区间含端点 [s,e]（旬号）与第 m 月的三个旬有无交集 */
+function monthsInRange(s, e){
+  const out = [];
+  for (let m = 1; m <= 12; m++) if (!(e < (m-1)*3) && !(s > (m-1)*3 + 2)) out.push(m);
+  return out;
 }
 
 function syncRange(){
@@ -34,7 +39,16 @@ function syncRange(){
   $('#drFill').style.width = axPct(eb - sb) + '%';
   const everywhere = (sb === 0 && eb === EDGE_N);                  // 0…36 = 全年 = 不限
   state.range = everywhere ? null : [s,e];
-  $('#cRange').textContent = everywhere ? '不限' : xunLabel(s) + ' — ' + xunLabel(e);
+  $('#drFill').classList.toggle('idle', everywhere);               // 不限时收起色带，尺面保持干净
+  /* 文案：整月对齐时收敛成「5月 — 7月」，单个旬时只写一次，其余精确到旬 */
+  const m1 = Math.floor(s/3) + 1, m2 = Math.floor(e/3) + 1;
+  const wholeMonths = !everywhere && s % 3 === 0 && e % 3 === 2;
+  $('#cRange').textContent = everywhere ? '不限'
+    : wholeMonths ? (m1 === m2 ? m1 + '月' : m1 + '月 — ' + m2 + '月')
+    : (s === e ? xunLabel(s) : xunLabel(s) + ' — ' + xunLabel(e));
+  /* 选中的月份：下方月份标签同步高亮（单数月份才有字） */
+  const hit = new Set(monthsInRange(s, e));
+  $('#rangeScale').querySelectorAll('span').forEach(n => n.classList.toggle('on', !everywhere && hit.has(+n.dataset.m)));
   $('#rsMin').setAttribute('aria-valuetext', xunLabel(s) + '起');   // 值域是边界，读屏仍报旬
   $('#rsMax').setAttribute('aria-valuetext', xunLabel(e) + '止');
 }

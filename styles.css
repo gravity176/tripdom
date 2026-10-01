@@ -106,39 +106,50 @@ input{font-family:inherit;}
 
 /* 出行时间：旬级双滑块（值域 = 旬边界 0…36；12 月 × 3 旬 = 36 等分 = 12 等格） */
 .range-wrap{padding:2px 2px 0; --thumb:16px;}
-.range-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;}
+.range-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:7px;}
 .range-label{font-size:12.5px; font-weight:650; color:var(--accent);}
 .range-reset{
   height:24px; padding:0 10px; border-radius:12px; border:1px solid var(--line-2);
   background:var(--paper); font-size:11px; color:var(--ink-3); transition:.15s;
 }
 .range-reset:hover{border-color:var(--brand); color:var(--brand);}
-.dual-range{position:relative; height:26px;}
-/* 内缩轴：左右各让出半个拇指宽，使「轨道 / 填充条 / 刻度 / 标签」共用同一条轴（= 拇指行程） */
-.dr-axis{position:absolute; left:calc(var(--thumb)/2); right:calc(var(--thumb)/2); top:11px; height:4px;}
-.dr-track{position:absolute; inset:0; border-radius:2px; background:var(--line);}
-.dr-fill{position:absolute; top:0; height:4px; border-radius:2px; background:var(--accent);}
-.dr-ticks{position:absolute; left:0; right:0; top:-3px; height:10px; pointer-events:none;}
-.dr-ticks i{position:absolute; top:0; width:1px; height:10px; border-radius:1px; background:var(--line-2); transform:translateX(-50%);}
+.dual-range{position:relative; height:28px;}
+/* 内缩轴：左右各让出半个拇指宽，使「轨道 / 填充条 / 月份标签」共用同一条轴（= 拇指行程）。
+   干干净净一条细线，不画任何刻度。 */
+.dr-axis{
+  position:absolute; left:calc(var(--thumb)/2); right:calc(var(--thumb)/2); top:11px; height:6px;
+  border-radius:3px; background:var(--line); overflow:hidden;
+}
+/* 选区色带：铺满轨道内高，圆角随轨道裁切；「不限」时淡出，保持干净 */
+.dr-fill{
+  position:absolute; top:0; bottom:0; left:0; width:0;
+  background:linear-gradient(180deg, rgba(199,116,47,.9), var(--accent)); transition:opacity .2s;
+}
+.dr-fill.idle{opacity:0;}
 .dual-range input[type=range]{
-  position:absolute; left:calc(var(--thumb)/2); top:0; width:calc(100% - var(--thumb)); height:26px; margin:0;
+  position:absolute; left:calc(var(--thumb)/2); top:0; width:calc(100% - var(--thumb)); height:28px; margin:0;
   -webkit-appearance:none; appearance:none; background:transparent; pointer-events:none;
 }
 .dual-range input[type=range]::-webkit-slider-runnable-track{background:transparent;}
 .dual-range input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none; appearance:none; pointer-events:auto; margin-top:5px;
+  -webkit-appearance:none; appearance:none; pointer-events:auto; margin-top:6px;
   width:16px; height:16px; border-radius:50%; background:#fff;
   border:2px solid var(--accent); box-shadow:var(--shadow-1); cursor:grab;
+  transition:box-shadow .15s, transform .15s;
 }
+.dual-range input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 2px 9px rgba(199,116,47,.45);}
+.dual-range input[type=range]::-webkit-slider-thumb:active{transform:scale(1.08); cursor:grabbing;}
 .dual-range input[type=range]::-moz-range-track{background:transparent;}
 .dual-range input[type=range]::-moz-range-thumb{
   pointer-events:auto; width:16px; height:16px; border-radius:50%; background:#fff;
-  border:2px solid var(--accent); cursor:grab;
+  border:2px solid var(--accent); cursor:grab; transition:box-shadow .15s, transform .15s;
 }
-/* 月份标签：绝对定位到与刻度完全相同的 left%（同一条轴），首个左对齐避免出界 */
-.range-scale{position:relative; height:13px; margin:3px calc(var(--thumb)/2) 0; font-size:10px; color:var(--ink-3);}
-.range-scale span{position:absolute; top:0; transform:translateX(-50%); white-space:nowrap;}
-.range-scale span.at-start{transform:none;}
+.dual-range input[type=range]::-moz-range-thumb:hover{box-shadow:0 2px 9px rgba(199,116,47,.45);}
+.dual-range input[type=range]::-moz-range-thumb:active{transform:scale(1.08); cursor:grabbing;}
+/* 月份标签：12 等分 flex（与轨道共用同一条内缩轴），每个标签居中在自己的月份列里 */
+.range-scale{display:flex; margin:4px calc(var(--thumb)/2) 0;}
+.range-scale span{flex:1 1 0; text-align:center; font-size:10px; color:var(--ink-3); white-space:nowrap; transition:color .15s;}
+.range-scale span.on{color:var(--accent); font-weight:650;}
 
 /* 主题 chips */
 .chips{display:flex; flex-wrap:wrap; gap:7px;}
