@@ -19,6 +19,28 @@ function provText(p){ return Array.isArray(p) ? p.join(' / ') : (p || ''); }
 function provList(p){ return Array.isArray(p) ? p : (p ? [p] : []); }
 const regionName = r => String((r && r.name) || '').replace(/[）)]+$/,'');   // 「三江源/可可西里」等名称保持原样
 
+/* data/backgrounds.json（可选）：抽屉顶部背景图。键同 data 里的名称 */
+let BG = { regions:{}, places:{} };
+function bgPick(bag, name){
+  if (!bag) return '';
+  const key = String(name == null ? '' : name).trim();
+  const v = bag[key] != null ? bag[key] : bag[name];
+  return typeof v === 'string' ? v.trim() : '';
+}
+/* kind: 'region' | 'place'；目的地没配图时回退到「所属旅游区域」的图 */
+function bgFor(kind, rec){
+  if (!rec) return '';
+  const bag = kind === 'region' ? BG.regions : BG.places;
+  const own = bgPick(bag, kind === 'region' ? regionName(rec) : rec.name) || bgPick(bag, rec.name);
+  if (own) return own;
+  for (const id of (rec.regionIds || [])){
+    const r = regionById[id]; if (!r) continue;
+    const url = bgPick(BG.regions, regionName(r)) || bgPick(BG.regions, r.name);
+    if (url) return url;
+  }
+  return '';
+}
+
 /* 省份全称 → general.json 里的简称
    四川省→四川 ／ 新疆维吾尔自治区→新疆 ／ 广西壮族自治区→广西 ／ 内蒙古自治区→内蒙古 ／ 香港特别行政区→香港 */
 function normProv(x){

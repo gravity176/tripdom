@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>途迹 · 中国旅游版图 v2</title>
+<link rel="preconnect" href="https://i0.hdslb.com" crossorigin>
 <link rel="stylesheet" href="styles.css">
 
 </head>
@@ -131,16 +132,19 @@
       <!-- ---------- 详情抽屉 ---------- -->
       <div class="drawer" id="drawer">
         <div class="dw-hero" id="dwHero">
+          <img class="dw-photo" id="dwPhoto" alt="" referrerpolicy="no-referrer" hidden>
+          <div class="dw-scrim"></div>
           <div class="dw-deco"></div>
           <button class="dw-close" id="dwClose" aria-label="关闭">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
           </button>
-          <div class="dw-kicker" id="dwKicker">目的地</div>
-          <div class="dw-name" id="dwName">—</div>
-          <div class="dw-region" id="dwRegion">—</div>
+          <div class="dw-hero-inner">
+            <span class="dw-kicker" id="dwKicker">目的地</span>
+            <div class="dw-name" id="dwName">—</div>
+            <div class="dw-region" id="dwRegion">—</div>
+          </div>
         </div>
         <div class="dw-body scroll" id="dwBody"></div>
-        <div class="dw-foot">信息仅供参考，出行前请以官方渠道的最新公告为准。</div>
       </div>
 
       <!-- 数据加载失败提示 -->
@@ -167,6 +171,7 @@
 
 <div class="scrim" id="scrim"></div>
 <div class="toast" id="toast"></div>
+<div class="tip" id="tip" role="tooltip" aria-hidden="true"></div>
 
 
 <!-- 应用脚本：经典脚本按序加载（共享全局作用域；initMap 必须保持全局） -->

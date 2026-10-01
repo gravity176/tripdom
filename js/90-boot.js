@@ -10,17 +10,19 @@
    data/provinceRegions.json 第一层：旅游区域
    data/places.json          第二层：目的地
    data/attractions.json     第三层：景点（缺失时降级为「待补充」）
+   data/backgrounds.json     可选：抽屉背景图链接（缺失/失败静默降级）
    ============================================================ */
 (async function boot(){
   const grab = url => fetch(url, { cache:'no-store' })
     .then(res => res.ok ? res.json() : Promise.reject(new Error('HTTP ' + res.status + ' ' + url)));
 
   try{
-    const [gen, reg, plc, att] = await Promise.all([
+    const [gen, reg, plc, att, bg] = await Promise.all([
       grab('./data/general.json')          .catch(e => { console.warn('general.json 未载入，改用内置主题字典', e); return null; }),
       grab('./data/provinceRegions.json'),
       grab('./data/places.json'),
-      grab('./data/attractions.json')      .catch(e => { console.warn('attractions.json 未载入，第三层降级为待补充', e); return null; })
+      grab('./data/attractions.json')      .catch(e => { console.warn('attractions.json 未载入，第三层降级为待补充', e); return null; }),
+      grab('./data/backgrounds.json')      .catch(() => null)   // 可选：没有背景图配置也能正常浏览
     ]);
 
     /* 元数据（general.json）：主题字典、省份→大区、站点标题 */
@@ -34,6 +36,8 @@
     REGIONS     = reg.provinceRegions || reg.regions || (Array.isArray(reg) ? reg : []);
     PLACES      = (plc.places || []).map(p => ({ ...p, key: !!p.key }));
     ATTRACTIONS = (att && (att.attractions || [])) || [];
+    BG          = bg && typeof bg === 'object'
+      ? { regions: bg.regions || {}, places: bg.places || {} } : { regions:{}, places:{} };
 
     /* 索引 */
     regionById  = Object.fromEntries(REGIONS.map(r=>[r.id,r]));
