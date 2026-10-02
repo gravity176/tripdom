@@ -14,7 +14,7 @@
    对外仍写回 state.range 的旬区间 [起旬, 止旬]（含端点，0…XUN_MAX），
    因此筛选 / 日历 / 计数等一切下游逻辑零改动。
    ------------------------------------------------------------ */
-function axPct(b){ return b / EDGE_N * 100; }                      // 边界 → 轴百分比
+function axPct(i){ return i / XUN_MAX * 100; }                     // 旬号 → 轴百分比
 
 /* 月份标签：仍是 12 等分 flex（与滑块行程共用同一条内缩轴，天然对齐），
    但只在单数月份落字 1·3·5·7·9·11月，视觉更干净 */
@@ -32,12 +32,10 @@ function monthsInRange(s, e){
 
 function syncRange(){
   const a = +$('#rsMin').value, b = +$('#rsMax').value;
-  const sb = Math.min(a,b), eb = Math.max(a,b);                    // 边界 0…EDGE_N
-  const s = Math.min(sb, XUN_MAX);                                 // 起始旬
-  const e = Math.max(s, Math.min(eb - 1, XUN_MAX));                // 结束旬（含端点）
-  $('#drFill').style.left  = axPct(sb) + '%';
-  $('#drFill').style.width = axPct(eb - sb) + '%';
-  const everywhere = (sb === 0 && eb === EDGE_N);                  // 0…36 = 全年 = 不限
+  const s = Math.min(a,b), e = Math.max(a,b);                      // 旬号 0…XUN_MAX
+  $('#drFill').style.left  = axPct(s) + '%';
+  $('#drFill').style.width = axPct(e - s) + '%';
+  const everywhere = (s === 0 && e === XUN_MAX);                   // 0…35 = 全年 = 不限
   state.range = everywhere ? null : [s,e];
   $('#drFill').classList.toggle('idle', everywhere);               // 不限时收起色带，尺面保持干净
   /* 文案：整月对齐时收敛成「5月 — 7月」，单个旬时只写一次，其余精确到旬 */
@@ -49,7 +47,7 @@ function syncRange(){
   /* 选中的月份：下方月份标签同步高亮（单数月份才有字） */
   const hit = new Set(monthsInRange(s, e));
   $('#rangeScale').querySelectorAll('span').forEach(n => n.classList.toggle('on', !everywhere && hit.has(+n.dataset.m)));
-  $('#rsMin').setAttribute('aria-valuetext', xunLabel(s) + '起');   // 值域是边界，读屏仍报旬
+  $('#rsMin').setAttribute('aria-valuetext', xunLabel(s) + '起');   // 值域即旬号，读屏同值
   $('#rsMax').setAttribute('aria-valuetext', xunLabel(e) + '止');
 }
 function renderThemeChips(){
