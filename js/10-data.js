@@ -27,18 +27,11 @@ function bgPick(bag, name){
   const v = bag[key] != null ? bag[key] : bag[name];
   return typeof v === 'string' ? v.trim() : '';
 }
-/* kind: 'region' | 'place'；目的地没配图时回退到「所属旅游区域」的图 */
+/* kind: 'region' | 'place'；只取「自身配置」的图：目的地不再回退到所属旅游区域的图 */
 function bgFor(kind, rec){
   if (!rec) return '';
   const bag = kind === 'region' ? BG.regions : BG.places;
-  const own = bgPick(bag, kind === 'region' ? regionName(rec) : rec.name) || bgPick(bag, rec.name);
-  if (own) return own;
-  for (const id of (rec.regionIds || [])){
-    const r = regionById[id]; if (!r) continue;
-    const url = bgPick(BG.regions, regionName(r)) || bgPick(BG.regions, r.name);
-    if (url) return url;
-  }
-  return '';
+  return bgPick(bag, kind === 'region' ? regionName(rec) : rec.name) || bgPick(bag, rec.name);
 }
 
 /* 省份全称 → general.json 里的简称

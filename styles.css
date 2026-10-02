@@ -356,13 +356,6 @@ input{font-family:inherit;}
 .pill{font-size:12px; padding:5px 11px; border-radius:14px; background:var(--paper-2); color:var(--ink-2);}
 .pill.more{cursor:pointer; background:var(--brand-soft); color:var(--brand); font-weight:600;}
 
-.link-chip{
-  display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border-radius:12px;
-  background:var(--brand-soft); border:1px solid #BFDCD3; color:var(--brand);
-  font-size:12.5px; font-weight:600; cursor:pointer; transition:.15s;
-}
-.link-chip:hover{background:#D3E8E0;}
-
 .pill.link{cursor:pointer; background:var(--brand-soft); color:var(--brand); font-weight:600; border:1px solid #BFDCD3;}
 .pill.link:hover{background:#D3E8E0;}
 
@@ -374,7 +367,7 @@ input{font-family:inherit;}
   color:var(--ink-2); cursor:pointer; transition:.15s;
 }
 .name-item:hover{border-color:var(--brand); color:var(--brand); background:var(--brand-soft);}
-.pill.link:focus-visible, .name-item:focus-visible, .link-chip:focus-visible{
+.pill.link:focus-visible, .name-item:focus-visible{
   outline:2px solid var(--brand); outline-offset:2px;
 }
 /* 跳转后高亮（景点 pill / 目的地名称共用） */

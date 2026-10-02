@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "抽屉顶部背景图链接表。键与 data 里的名称一致：regions ↔ provinceRegions.json 的 name（如「川西」）；places ↔ places.json 的 name（如「稻城亚丁」）。目的地没配图时会自动回退到所属区域的图；仍未命中则只用主题渐变。空字符串 = 未配置。图片建议 1200px 宽左右的横向图，加载失败会自动回退，不影响页面。",
+  "note": "抽屉顶部背景图链接表。键与 data 里的名称一致：regions ↔ provinceRegions.json 的 name（如「川西」）；places ↔ places.json 的 name（如「稻城亚丁」）。目的地没配图时只用主题渐变（不再回退到所属区域的图）。空字符串 = 未配置。图片建议 1200px 宽左右的横向图，加载失败会自动回退，不影响页面。",
 
   "regions": {
     "川西": "https://i0.hdslb.com/bfs/new_dyn/b98a3000c9b4a17fe3b7f98d9bf146c2570095551.jpg@1192w.avif",

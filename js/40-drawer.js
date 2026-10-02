@@ -64,13 +64,6 @@ function placeTipHTML(p){
     ${p.summary ? `<div class="tip-row">${txt(p.summary)}</div>` : ''}
     <div class="tip-hint">点击打开该目的地详情 →</div>`;
 }
-function regionTipHTML(r){
-  return `<b>${esc(regionName(r))}</b>
-    <div class="tip-row"><span class="tip-k">范围：</span>${esc(provText(r.province))} · ${r.places.length} 个目的地 · ${(r.spots || []).length} 个代表景点</div>
-    ${r.bestSeason ? `<div class="tip-row"><span class="tip-k">最佳季节：</span>${esc(seasonDisplay(r))}</div>` : ''}
-    ${r.summary ? `<div class="tip-row">${txt(r.summary)}</div>` : ''}
-    <div class="tip-hint">点击打开该旅游区域 →</div>`;
-}
 /* s = { name, attraction|null }：区域「代表景点」在悬浮卡里补回所属目的地与星级 */
 function spotTipHTML(s){
   const a = s.attraction;
@@ -91,7 +84,6 @@ function bindDrawerLinks(){
     n.onclick = make(n);
     n.onkeydown = e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); if (n.onclick) n.onclick(); } };
   });
-  bind('[data-region]', n => () => openRegion(n.dataset.region, true));
   bind('[data-spot]',   n => () => openSpot(n.dataset.spot));
   bind('[data-go]',     n => () => openPlace(n.dataset.go, true));
 }
@@ -105,7 +97,6 @@ const emptySum = t => t || '<span class="dim">暂无概览文字。</span>';
 function openPlace(id, move){
   const p = placeById[id]; if(!p) return;
   state.current = { type:'place', id };
-  const regions = (p.regionIds||[]).map(x=>regionById[x]).filter(Boolean);
 
   $('#dwKicker').textContent = '目的地';
   $('#dwName').textContent   = p.name;
@@ -121,25 +112,12 @@ function openPlace(id, move){
 
   $('#dwBody').innerHTML = `
     <div class="dw-sec">
-      <h5>什么时候去</h5>
-      <div class="cal-wrap">
-        ${calHTML(p._season)}
-        <div class="cal-note">${esc(seasonDisplay(p) || '季节信息待补充（本条不参与时间筛选）')}</div>
-      </div>
+      <h5>推荐季节</h5>
+      <p>${esc(seasonDisplay(p) || '季节信息待补充（本条不参与时间筛选）')}</p>
     </div>
     <div class="dw-sec">
       <h5>概览</h5>
       <div class="dw-sum">${emptySum(txt(p.summary))}</div>
-    </div>
-    ${regions.length ? `<div class="dw-sec">
-      <h5>所属旅游区域</h5>
-      <div class="pill-row">${regions.map(r=>
-        `<span class="link-chip" data-region="${esc(r.id)}" tabindex="0"${tipAttr(regionTipHTML(r))}>${esc(regionName(r))} →</span>`).join('')}</div>
-    </div>` : ''}
-    <div class="dw-sec">
-      <h5>主题</h5>
-      <div class="pill-row">${(p.themes||[]).map(t=>
-        `<span class="pill" style="background:${themeColor(t)}14;color:${themeColor(t)}">${themeName(t)}</span>`).join('')}</div>
     </div>
     ${p.transport ? `<div class="dw-sec"><h5>交通</h5><p>${txt(p.transport)}</p></div>` : ''}
     <div class="dw-sec" style="margin-bottom:0">
