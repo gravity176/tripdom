@@ -69,7 +69,7 @@
     return;
   }
 
-  renderMonthScale();                       // 13 条刻度 + 月份标签（与滑块共用同一条轴）
+  renderMonthScale();                       // 12 个月份标签（与滑块共用同一条内缩轴）
   syncRange();
   renderLegend(); renderStats(); render();
 })();

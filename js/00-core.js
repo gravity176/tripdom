@@ -60,7 +60,7 @@ function setThemes(list){                                       // general.json 
 const XUN      = { '上':0, '中':1, '下':2 };
 const XUN_NAME = ['上','中','下'];
 const XUN_MAX  = 35;                            // 旬号上限：0 = 1月上旬 … 35 = 12月下旬
-const EDGE_N   = XUN_MAX + 1;                   // 旬「边界」数 36 = 12 月 × 3 旬（双滑块值域 0…36）
+const EDGE_N   = XUN_MAX + 1;                   // 旬「边界」数 36 = 12 月 × 3 旬（历史常量；双滑块已改用旬号 0…XUN_MAX）
 const ALL_SEASON = [[0, XUN_MAX]];              // 「全年」= 1月上旬—12月下旬
 
 function xunLabel(i){

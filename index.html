@@ -59,14 +59,15 @@
             <span class="range-label" id="cRange">不限</span>
             <button class="range-reset" id="rangeReset">不限</button>
           </div>
-          <!-- 滑块值域 = 旬「边界」0…36（36 = 12月下旬结束）；由 20-list.syncRange() 换算成旬区间。
+          <!-- 滑块值域 = 旬号 0…35（0 = 1月上旬 … 35 = 12月下旬）；由 20-list.syncRange() 直接使用，
+               不再做「边界 → 旬号」换算（axPct 以 XUN_MAX=35 为分母，故 max 必须等于 35）。
                「轨道 / 填充条 / 月份标签」共用同一条内缩轴（= 拇指行程），无刻度线。 -->
           <div class="dual-range">
             <div class="dr-axis">
               <div class="dr-fill" id="drFill"></div>
             </div>
-            <input type="range" id="rsMin" min="0" max="36" step="1" value="0" aria-label="起始旬">
-            <input type="range" id="rsMax" min="0" max="36" step="1" value="36" aria-label="结束旬">
+            <input type="range" id="rsMin" min="0" max="35" step="1" value="0" aria-label="起始旬">
+            <input type="range" id="rsMax" min="0" max="35" step="1" value="35" aria-label="结束旬">
           </div>
           <div class="range-scale" id="rangeScale"></div>
         </div>
