@@ -1,7 +1,7 @@
 /* ============================================================
    途迹 · map     腾讯地图 / 标记 / 信息窗
    ------------------------------------------------------------
-   依赖：00-core 10-data。全局：initMap failMap map markerLayer infoWin renderMarkers hoverPlace easeTo（initMap/failMap 供 SDK 的 inline onload/onerror 调用，必须是全局函数）
+   依赖：00-core 10-data。全局：initMap failMap map markerLayer infoWin renderMarkers hoverPlace easeTo lngShiftForPx drawerBiasPx（initMap/failMap 供 SDK 的 inline onload/onerror 调用，必须是全局函数）
    ============================================================ */
 /* ============================================================
    地图（腾讯地图 GL JS · 代理模式）
@@ -77,9 +77,28 @@ function hoverPlace(p){
   infoWin.setPosition(new TMap.LatLng(p.coord.lat, p.coord.lng));
   infoWin.open();
 }
+/* ---------- 抽屉遮挡补偿 ----------
+   抽屉压在右侧（.drawer 宽 432px / max-width 92vw），地图的「视觉中心」其实在未被遮挡区域的正中。
+   让选中点落在那里 = 把它向左让出「抽屉的一半宽」；向左让点 = 把地图中心向右推同样多像素。
+   目的地抽屉（openPlace → zoom 6.5）与区域抽屉（openRegion → zoom 5.5）共用 easeTo，因此两类抽屉行为一致。 */
+const DRAWER_BIAS = 0.5;      // 0 = 不偏移；0.5 = 落在未遮挡区正中（想少挪一点就调小）
+const MERCATOR_WORLD = 256;   // 腾讯 GL 底图 Web Mercator：世界宽 = 256 × 2^zoom px
+
+function lngShiftForPx(zoom, px){                 // 屏幕水平位移 px → 经度增量（度）
+  return px ? px * 360 / (MERCATOR_WORLD * Math.pow(2, zoom)) : 0;
+}
+function drawerBiasPx(){                          // 抽屉实际压住地图多少 → 需要让出的半宽（px）
+  const d = document.getElementById('drawer'), m = document.getElementById('map');
+  if (!d || !m || !d.classList.contains('open')) return 0;    // 抽屉没开就不偏移
+  const dr = d.getBoundingClientRect(), mr = m.getBoundingClientRect();
+  const overlap = Math.max(0, Math.min(dr.width, mr.right - dr.left, mr.width));
+  return Math.min(overlap * DRAWER_BIAS, mr.width * 0.42);    // 窄屏（92vw）兜底：别把图钉顶出画面
+}
 function easeTo(coord, zoom){
   if (!map || !coord) return;
-  try{ map.easeTo({ center:new TMap.LatLng(coord.lat,coord.lng), zoom: Math.max(map.getZoom(), zoom) }, { duration: 620 }); }
-  catch(e){ map.setCenter(new TMap.LatLng(coord.lat,coord.lng)); map.setZoom(Math.max(map.getZoom(), zoom)); }
+  const z = Math.max(map.getZoom(), zoom);
+  const center = new TMap.LatLng(coord.lat, coord.lng + lngShiftForPx(z, drawerBiasPx()));
+  try{ map.easeTo({ center, zoom: z }, { duration: 620 }); }
+  catch(e){ map.setCenter(center); map.setZoom(z); }
 }
 
