@@ -42,8 +42,11 @@
   "places": {
     "日喀则": "https://i0.hdslb.com/bfs/new_dyn/c1fc44cbf08e45130f10339af4814990570095551.png@1192w.avif",
     "林芝": "https://i0.hdslb.com/bfs/new_dyn/a92a4bea917a409b8dc8235b982edb2c570095551.png@1192w.avif",
-    "阿里地区": "https://i0.hdslb.com/bfs/new_dyn/720d872437167b5b90b292eedeca6234570095551.jpg@1192w.avif"
-    
+    "阿里地区": "https://i0.hdslb.com/bfs/new_dyn/720d872437167b5b90b292eedeca6234570095551.jpg@1192w.avif",
+    "成都": "data/images/chengdu_panda.jpeg",
+    "阿坝州": "data/images/aba_huanglong.jpeg",
+    "崇左": "data/images/chongzuo_view.jpeg",
+    "南宁": "data/images/nanning_qingxiushan.jpeg"
   }
 }
 
