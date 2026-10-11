@@ -1,9 +1,18 @@
 {
-    "meta": {
+  "meta": {
     "layer": 2,
     "name": "places",
     "title": "第二层 · 目的地",
-    "themes": ["nature", "culture", "history", "food", "city", "coast", "snow", "hiking"],
+    "themes": [
+      "nature",
+      "culture",
+      "history",
+      "food",
+      "city",
+      "coast",
+      "snow",
+      "hiking"
+    ],
     "coordNote": "coord 为 GCJ-02 坐标，用于打点展示；精确到景点入口级别需经地图地点搜索接口校准。",
     "keyNote": "key=true 表示重点目的地（50 条，每个省级行政区 1—5 个），key=false 为非重点目的地；页面上不再做「重点」徽标区分，地图默认只打点重点目的地，打开 / 限定某个旅游区域后改为打该区域的全部关联目的地。",
     "link": {
@@ -24,7 +33,6 @@
       "transport": "string，选填。"
     }
   },
-
   "places": [
     {
       "id": "dali",
